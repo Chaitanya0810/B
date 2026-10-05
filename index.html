@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>B+ Tree File Index</title>
+    <link rel="stylesheet" href="visualizationPageStyle.css">
+    <link rel="stylesheet" href="ThirdParty/jquery-ui-1.8.11.custom.css">
+    <link rel="stylesheet" href="modern-theme.css">
+    <script src="ThirdParty/jquery-1.5.2.min.js"></script>
+    <script src="ThirdParty/jquery-ui-1.8.11.custom.min.js"></script>
+    <script src="AnimationLibrary/CustomEvents.js"></script>
+    <script src="AnimationLibrary/UndoFunctions.js"></script>
+    <script src="AnimationLibrary/AnimatedObject.js"></script>
+    <script src="AnimationLibrary/AnimatedLabel.js"></script>
+    <script src="AnimationLibrary/AnimatedCircle.js"></script>
+    <script src="AnimationLibrary/AnimatedRectangle.js"></script>
+    <script src="AnimationLibrary/AnimatedLinkedList.js"></script>
+    <script src="AnimationLibrary/AnimatedBTreeNode.js"></script>
+    <script src="AnimationLibrary/HighlightCircle.js"></script>
+    <script src="AnimationLibrary/Line.js"></script>
+    <script src="AnimationLibrary/ObjectManager.js"></script>
+    <script src="AnimationLibrary/AnimationMain.js"></script>
+    <script src="AlgorithmLibrary/Algorithm.js"></script>
+    <script src="AlgorithmLibrary/BPlusTree.js"></script>
+    <script src="file-demo.js"></script>
+</head>
+<body onload="init();" class="VisualizationMainPage">
+<div id="container">
+    <header id="header">
+        <div class="brand-lockup">
+            <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 5 5 15l19 10 19-10L24 5ZM5 24l19 10 19-10M5 33l19 10 19-10"/></svg></div>
+            <div class="brand-copy"><div class="eyebrow">INDEXING LAB · NUMBERED FILES</div><h1>B<sup>+</sup> <span>Tree Search</span></h1><p>Follow a key from the root page to its file reference.</p></div>
+        </div>
+        <div class="header-badge"><span class="status-dot"></span> IN-MEMORY FILE SET</div>
+    </header>
+    <main id="mainContent">
+        <div id="algoControlSection"><div class="section-kicker"><span>01</span> TREE SETTINGS <i></i></div><table id="AlgorithmSpecificControls"></table></div>
+        <section class="index-lookup-panel" aria-labelledby="lookup-title">
+            <div class="query-panel-head"><div><div class="section-kicker"><span>02</span> INDEX LOOKUP <i></i></div><h2 id="lookup-title">Search for a file key</h2></div><div class="query-plan-badge"><span class="plan-dot"></span> B+ TREE <code>key → file tag</code></div></div>
+            <form id="file-search-form" class="query-editor"><label for="file-search-key">SEARCH KEY</label><input id="file-search-key" type="number" min="1" max="9999" value="50" aria-label="File key to search"><button type="submit">Trace search <span aria-hidden="true">↗</span></button></form>
+            <div class="query-execution-path" aria-label="B plus tree search steps"><span class="path-step"><b>01</b> ROOT</span><i></i><span class="path-step"><b>02</b> INDEX PAGES</span><i></i><span class="path-step"><b>03</b> LEAF KEY</span><i></i><span class="path-step"><b>04</b> FILE TAG</span></div>
+            <div class="query-panel-foot"><span id="index-search-status" role="status">Ready · search key 50 to watch the index traversal.</span><span>Each leaf tag is a sample file reference.</span></div>
+        </section>
+        <section class="record-file-panel" aria-labelledby="files-title">
+            <div class="record-file-head"><div><div class="section-kicker"><span>03</span> NUMBERED FILES <i></i></div><h2 id="files-title">Sample file set <small>INDEXED RECORDS</small></h2></div><div class="table-row-count"><b id="file-record-count">10</b> FILES</div></div>
+            <p class="file-set-note">Ten sample files start in the index. Insert one more to see the B+ tree split and rebalance as needed.</p>
+            <form id="file-insert-form" class="file-insert-form">
+                <label>New key<input id="file-insert-key" type="number" min="1" max="9999" value="110" required></label>
+                <label>File name<input id="file-insert-name" type="text" maxlength="36" value="file_110.dat" required></label>
+                <button type="submit">Insert file + index</button>
+            </form>
+            <div class="record-file-scroll"><table class="record-file-table" aria-label="Numbered sample files"><thead><tr><th>KEY</th><th>FILE</th><th>LEAF REFERENCE</th><th></th></tr></thead><tbody id="record-file-body"></tbody></table></div>
+            <div id="file-search-result" class="file-search-result" role="status">Search a key to see which file entry the leaf points to.</div>
+        </section>
+        <div class="stage-heading">
+            <div><div class="section-kicker"><span>04</span> LIVE B+ TREE <i></i></div><h2>Every branch narrows the key range<span class="heading-period">.</span></h2></div>
+            <div class="stage-tools">
+                <div class="stage-mark"><span class="branch-glyph" aria-hidden="true"><svg viewBox="0 0 36 25"><path d="M3 4h30M7 4v7h22v6M12 11v6M24 11v6M7 17v5M18 17v5M29 17v5"/><circle cx="7" cy="22" r="2"/><circle cx="18" cy="22" r="2"/><circle cx="29" cy="22" r="2"/></svg></span><span>ROOT → CHILD → LEAF → FILE</span></div>
+                <div id="treeAnimationControls" class="tree-animation-controls" role="group" aria-label="Tree animation controls"></div>
+            </div>
+        </div>
+        <canvas id="canvas" width="1400" height="650"></canvas>
+        <div class="stage-legend" aria-label="B plus tree legend"><span><i class="legend-index"></i> Internal page <small>separator keys + child pointers</small></span><span><i class="legend-leaf"></i> Leaf page <small>keys + file tags</small></span><span><i class="legend-link"></i> Leaf sibling link <small>ordered scan path</small></span><span class="legend-note">All root-to-leaf paths stay balanced</span></div>
+        <div id="generalAnimationControlSection"><div class="section-kicker"><span>05</span> SPEED &amp; CANVAS SETTINGS <i></i></div><table id="GeneralAnimationControls"></table></div>
+    </main>
+    <footer id="footer"><p>B+ tree algorithm and animation based on <a href="https://github.com/sunrenjie/JavascriptVisualRelease">JavascriptVisualRelease</a>.</p></footer>
+</div>
+</body>
+</html>
